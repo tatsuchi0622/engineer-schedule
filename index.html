@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Engineer Schedule Calendar</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #ffffff; --bg2: #f5f5f4; --bg3: #eeece6;
+    --text: #1a1a18; --text2: #6b6b66; --text3: #a0a09a;
+    --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.22);
+    --radius: 8px; --radius-lg: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a; --bg2: #252523; --bg3: #2e2e2b;
+      --text: #f0ede6; --text2: #a0a09a; --text3: #6b6b66;
+      --border: rgba(255,255,255,0.12); --border2: rgba(255,255,255,0.22);
+    }
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg3); min-height: 100vh; display: flex; justify-content: center; padding: 2rem 1rem; }
+  .app { background: var(--bg); border-radius: var(--radius-lg); border: 0.5px solid var(--border); padding: 1.5rem; width: 100%; max-width: 720px; height: fit-content; }
+  .header { margin-bottom: 1.25rem; }
+  .header h1 { font-size: 18px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .header p { font-size: 13px; color: var(--text2); }
+  .mnav { display: flex; align-items: center; gap: 12px; margin-bottom: .75rem; }
+  .mtitle { font-size: 18px; font-weight: 500; flex: 1; color: var(--text); }
+  .nbtn { background: none; border: 0.5px solid var(--border2); border-radius: var(--radius); width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text2); font-size: 16px; transition: background .12s; }
+  .nbtn:hover { background: var(--bg2); }
+  .leg { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: .75rem; font-size: 12px; color: var(--text2); align-items: center; }
+  .li { display: flex; align-items: center; gap: 5px; }
+  .ld { width: 12px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .ld.tbd { border: 1.5px dashed; background: transparent !important; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: .75rem; }
+  .sc { background: var(--bg2); border-radius: var(--radius); padding: 8px 12px; }
+  .sl { font-size: 12px; color: var(--text2); margin-bottom: 3px; display: flex; align-items: center; gap: 5px; }
+  .sv { font-size: 20px; font-weight: 500; color: var(--text); }
+  .ss { font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .cg { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+  .ch { text-align: center; font-size: 11px; color: var(--text2); padding: 3px 0; font-weight: 500; }
+  .cd { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius); min-height: 82px; padding: 4px; cursor: pointer; transition: border-color .12s; }
+  .cd:hover { border-color: var(--border2); }
+  .cd.om { background: var(--bg3); opacity: .35; cursor: default; }
+  .cd.we { background: var(--bg2); }
+  .cd.td { border-color: #378ADD; }
+  .dn { font-size: 11px; color: var(--text2); margin-bottom: 3px; line-height: 1; }
+  .cd.td .dn { color: #378ADD; font-weight: 500; }
+  .eb { font-size: 10px; border-radius: 3px; padding: 1px 4px; margin-bottom: 2px; line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .eb.cont { font-size: 0; height: 13px; margin-bottom: 2px; border-radius: 1px; }
+  .eb.tbd-bar { background: transparent !important; border-style: dashed; border-width: 1px; }
+  .dp { margin-top: .75rem; background: var(--bg2); border-radius: var(--radius-lg); padding: .875rem 1.125rem; min-height: 52px; }
+  .dpt { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+  .dr { display: flex; align-items: flex-start; gap: 8px; padding: 5px 0; border-top: 0.5px solid var(--border); font-size: 13px; }
+  .db { font-size: 11px; border-radius: 3px; padding: 1px 7px; font-weight: 500; flex-shrink: 0; }
+  .em { color: var(--text3); font-size: 13px; }
+  .tbdpill { font-size: 10px; border-radius: 3px; padding: 1px 5px; border: 1px dashed var(--border2); color: var(--text2); margin-left: 4px; }
+  .footer { margin-top: 1rem; padding-top: .75rem; border-top: 0.5px solid var(--border); font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 6px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1><i class="ti ti-calendar" aria-hidden="true" style="font-size:18px;vertical-align:-2px;margin-right:6px"></i>Engineer Schedule Calendar</h1>
+    <p>CSE Consulting — David &amp; Yuhua の稼働スケジュール</p>
+  </div>
+
+  <div class="mnav">
+    <button class="nbtn" id="prev" aria-label="前の月"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+    <div class="mtitle" id="mtitle"></div>
+    <button class="nbtn" id="next" aria-label="次の月"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+  </div>
+
+  <div class="leg">
+    <div class="li"><div class="ld" style="background:#B5D4F4"></div>David (確定)</div>
+    <div class="li"><div class="ld tbd" style="border-color:#378ADD"></div>David (TBD)</div>
+    <div class="li"><div class="ld" style="background:#9FE1CB"></div>Yuhua (確定)</div>
+    <div class="li"><div class="ld tbd" style="border-color:#0F6E56"></div>Yuhua (TBD)</div>
+    <div class="li" style="margin-left:auto;font-size:11px"><i class="ti ti-database" style="font-size:13px" aria-hidden="true"></i> #cse-consulting-pr-booking-apac</div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="cg" id="cg">
+    <div class="ch">Sun</div><div class="ch">Mon</div><div class="ch">Tue</div>
+    <div class="ch">Wed</div><div class="ch">Thu</div><div class="ch">Fri</div><div class="ch">Sat</div>
+  </div>
+
+  <div class="dp" id="dp"><div class="em">日付をクリックするとイベント詳細を表示します</div></div>
+
+  <div class="footer">
+    <i class="ti ti-info-circle" aria-hidden="true"></i>
+    OA = 5営業日 &nbsp;|&nbsp; DEA / PR / TAC = 15営業日（土日除く）
+  </div>
+</div>
+
+<script>
+const ENG = { David: { bg: "#B5D4F4", tc: "#0C447C" }, Yuhua: { bg: "#9FE1CB", tc: "#085041" } };
+
+function pd(s) { const [y,m,d] = s.split("-").map(Number); return new Date(y,m-1,d); }
+function fd(dt) { return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,"0")}-${String(dt.getDate()).padStart(2,"0")}`; }
+function addBiz(start, n) { let c=1, cur=new Date(start); while(c<n){cur.setDate(cur.getDate()+1);if(cur.getDay()&&cur.getDay()<6)c++;} return cur; }
+function bizBetween(s, e) { let c=0, cur=new Date(s); while(cur<=e){if(cur.getDay()&&cur.getDay()<6)c++;cur.setDate(cur.getDate()+1);} return c; }
+
+const RAW = [
+  { eng:"David", client:"Mazda", type:"TAC", start:"2026-06-08", endStr:"2026-06-12", confirmed:true, note:"David: Jun 8-12 / Yuhua: Jun 15-26" },
+  { eng:"David", client:"Brother", type:"OA", start:"2026-06-22", bizDays:5, confirmed:true },
+  { eng:"David", client:"Toshiba Tec", type:"PR", start:"2026-07-06", bizDays:15, confirmed:false, note:"Soft-booked — スコープ調整中" },
+  { eng:"Yuhua", client:"Fukui Computer", type:"OA", start:"2026-06-08", bizDays:5, confirmed:true },
+  { eng:"Yuhua", client:"Mazda", type:"TAC", start:"2026-06-15", endStr:"2026-06-26", confirmed:true, note:"David: Jun 8-12 / Yuhua: Jun 15-26" },
+  { eng:"Yuhua", client:"Fukui Computer", type:"OA", start:"2026-06-29", bizDays:5, confirmed:true },
+  { eng:"Yuhua", client:"Fukui Computer", type:"DEA", start:"2026-07-13", bizDays:15, confirmed:true },
+  { eng:"Yuhua", client:"KHI (Robot)", type:"ES Consulting", start:"2026-07-06", bizDays:5, confirmed:false, note:"TBD — 顧客確認待ち (Jun 16ミーティング)" },
+  { eng:"Yuhua", client:"Fukui Computer", type:"OA", start:"2026-08-03", bizDays:5, confirmed:true },
+  { eng:"Yuhua", client:"Fukui Computer", type:"OA", start:"2026-08-24", bizDays:5, confirmed:true },
+];
+
+const EVTS = RAW.map(e => {
+  const s = pd(e.start);
+  const end = e.endStr ? pd(e.endStr) : addBiz(s, e.bizDays);
+  return { ...e, startDate: s, endDate: end, biz: bizBetween(s, end) };
+});
+
+let cY = 2026, cM = 5;
+
+function active(ds) { const dt = pd(ds); return EVTS.filter(e => dt >= e.startDate && dt <= e.endDate); }
+
+function renderStats() {
+  const el = document.getElementById("stats"); el.innerHTML = "";
+  ["David","Yuhua"].forEach(eng => {
+    const dim = new Date(cY,cM+1,0).getDate();
+    let days = new Set();
+    for (let d=1;d<=dim;d++) {
+      const dt = new Date(cY,cM,d);
+      if (!dt.getDay()||dt.getDay()===6) continue;
+      const ds = fd(dt);
+      if (EVTS.some(e => e.eng===eng && dt>=e.startDate && dt<=e.endDate)) days.add(ds);
+    }
+    const c = ENG[eng];
+    const proj = [...new Set(EVTS.filter(e => e.eng===eng && e.startDate.getMonth()===cM && e.startDate.getFullYear()===cY).map(e=>e.client))];
+    el.innerHTML += `<div class="sc">
+      <div class="sl"><span style="width:8px;height:8px;border-radius:2px;background:${c.bg};border:1px solid ${c.tc}50;display:inline-block"></span>${eng}-san</div>
+      <div class="sv">${days.size}<span style="font-size:13px;font-weight:400;color:var(--text2)"> 日</span></div>
+      <div class="ss">${proj.length ? proj.join(" / ") : "予定なし"}</div>
+    </div>`;
+  });
+}
+
+function renderCal() {
+  const g = document.getElementById("cg");
+  Array.from(g.children).forEach(c => { if (!c.classList.contains("ch")) c.remove(); });
+  document.getElementById("stats").innerHTML = ""; renderStats();
+  const mn = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  document.getElementById("mtitle").textContent = `${mn[cM]} ${cY}`;
+  const fd0 = new Date(cY,cM,1).getDay(), dim = new Date(cY,cM+1,0).getDate(), prev = new Date(cY,cM,0).getDate();
+  const today = new Date(), ts = fd(today);
+
+  for (let i=0;i<fd0;i++) {
+    const c = document.createElement("div"); c.className="cd om";
+    c.innerHTML=`<div class="dn">${prev-fd0+1+i}</div>`; g.appendChild(c);
+  }
+  for (let d=1;d<=dim;d++) {
+    const ds = `${cY}-${String(cM+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const dt = pd(ds); const we = !dt.getDay()||dt.getDay()===6;
+    const c = document.createElement("div");
+    c.className = "cd"+(we?" we":"")+(ds===ts?" td":"");
+    const evts = active(ds);
+    let h = `<div class="dn">${d}</div>`;
+    if (!we) {
+      evts.forEach(e => {
+        const col = ENG[e.eng];
+        const isS = fd(e.startDate)===ds;
+        const cls = "eb"+(isS?"":" cont")+(e.confirmed?"":" tbd-bar");
+        const style = e.confirmed ? `background:${col.bg};color:${col.tc}` : `border-color:${col.tc};color:${col.tc}`;
+        h += `<div class="${cls}" style="${style}">${isS ? `${e.eng}: ${e.client}${e.confirmed?"":" ⋯"}` : ""}</div>`;
+      });
+    }
+    c.innerHTML = h;
+    if (!we) c.addEventListener("click", () => showDetail(ds, d, evts));
+    g.appendChild(c);
+  }
+  const rem = (fd0+dim)%7===0 ? 0 : 7-(fd0+dim)%7;
+  for (let d=1;d<=rem;d++) {
+    const c = document.createElement("div"); c.className="cd om";
+    c.innerHTML=`<div class="dn">${d}</div>`; g.appendChild(c);
+  }
+}
+
+function showDetail(ds, day, evts) {
+  const p = document.getElementById("dp");
+  const mn = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  if (!evts.length) { p.innerHTML=`<div class="dpt">${mn[cM]} ${day}, ${cY}</div><div class="em">この日のイベントはありません</div>`; return; }
+  const rows = evts.map(e => {
+    const c = ENG[e.eng];
+    const ss = `${e.startDate.getMonth()+1}/${e.startDate.getDate()}`;
+    const se = `${e.endDate.getMonth()+1}/${e.endDate.getDate()}`;
+    const dayN = bizBetween(e.startDate, pd(ds));
+    const tbdPill = e.confirmed ? "" : `<span class="tbdpill">TBD</span>`;
+    const noteEl = e.note ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">${e.note}</div>` : "";
+    return `<div class="dr">
+      <span class="db" style="background:${e.confirmed?c.bg:"transparent"};color:${c.tc};${e.confirmed?"":"border:1px dashed "+c.tc}">${e.eng}-san</span>
+      <div>
+        <div style="font-weight:500;color:var(--text)">${e.client} <span style="font-weight:400;color:var(--text2);font-size:12px">[${e.type}]</span>${tbdPill}</div>
+        <div style="color:var(--text2);font-size:12px">${ss} 〜 ${se} (${e.biz}営業日) — 本日: ${dayN}日目</div>
+        ${noteEl}
+      </div>
+    </div>`;
+  }).join("");
+  p.innerHTML = `<div class="dpt">${mn[cM]} ${day}, ${cY}</div>${rows}`;
+}
+
+document.getElementById("prev").addEventListener("click", () => {
+  cM--; if(cM<0){cM=11;cY--;} renderCal();
+  document.getElementById("dp").innerHTML='<div class="em">日付をクリックするとイベント詳細を表示します</div>';
+});
+document.getElementById("next").addEventListener("click", () => {
+  cM++; if(cM>11){cM=0;cY++;} renderCal();
+  document.getElementById("dp").innerHTML='<div class="em">日付をクリックするとイベント詳細を表示します</div>';
+});
+
+renderCal();
+</script>
+</body>
+</html>
